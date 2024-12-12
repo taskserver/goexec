@@ -66,12 +66,14 @@ type ExecTask struct {
 }
 
 type ExecResult struct {
-	Stdout    string
-	Stderr    string
-	ExitCode  int
-	Timedout  bool
-	Cancelled bool
-	Duration  time.Duration
+	Stdout     string
+	Stderr     string
+	ExitCode   int
+	Timedout   bool
+	Cancelled  bool
+	StartedAt  time.Time
+	FinishedAt time.Time
+	Duration   time.Duration
 }
 
 func (et ExecTask) Execute(ctx context.Context) (ExecResult, error) {
@@ -211,11 +213,13 @@ func (et ExecTask) Execute(ctx context.Context) (ExecResult, error) {
 	}
 
 	return ExecResult{
-		Stdout:    stdoutBuff.String(),
-		Stderr:    stderrBuff.String(),
-		ExitCode:  exitCode,
-		Duration:  execEnd.Sub(execStart),
-		Timedout:  ctx.Err() == context.DeadlineExceeded,
-		Cancelled: ctx.Err() == context.Canceled,
+		Stdout:     stdoutBuff.String(),
+		Stderr:     stderrBuff.String(),
+		ExitCode:   exitCode,
+		StartedAt:  execStart,
+		FinishedAt: execEnd,
+		Duration:   execEnd.Sub(execStart),
+		Timedout:   ctx.Err() == context.DeadlineExceeded,
+		Cancelled:  ctx.Err() == context.Canceled,
 	}, ctx.Err()
 }
